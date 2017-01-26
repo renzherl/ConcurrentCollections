@@ -1,0 +1,5 @@
+d:\documents\visual studio 2013\Projects\ConcurrentCollections\bin\Debug\ConcurrentCollections.exe.config
+d:\documents\visual studio 2013\Projects\ConcurrentCollections\bin\Debug\ConcurrentCollections.exe
+d:\documents\visual studio 2013\Projects\ConcurrentCollections\bin\Debug\ConcurrentCollections.pdb
+d:\documents\visual studio 2013\Projects\ConcurrentCollections\obj\Debug\ConcurrentCollections.exe
+d:\documents\visual studio 2013\Projects\ConcurrentCollections\obj\Debug\ConcurrentCollections.pdb
