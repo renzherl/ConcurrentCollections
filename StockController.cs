@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ConcurrentCollections
 {
@@ -14,6 +11,13 @@ namespace ConcurrentCollections
         private int _totalQuantityBought;
         private int _totalQuantitySold;
         private Object _syncObj = new Object();
+
+        private ToDoQueue _toDoQueue;
+
+        public StockController(ToDoQueue bonusCalculator)
+        {
+            this._toDoQueue = bonusCalculator;
+        }
 
         public void BuyStockWithLock(string item, int quantity)
         {
@@ -29,10 +33,11 @@ namespace ConcurrentCollections
             }
         }
 
-        public void BuyStock(string item, int quantity)
+        public void BuyStock(SalesPerson person, string item, int quantity)
         {
             _stock.AddOrUpdate(item, quantity, (key, oldValue) => oldValue + quantity);
             Interlocked.Add(ref _totalQuantityBought, quantity);
+            _toDoQueue.AddTrade(new Trade(person, -quantity));
         }
 
         public bool TrySellItemWithLock(string item)
@@ -47,7 +52,7 @@ namespace ConcurrentCollections
             }
         }
 
-        public bool TrySellItem(string item)
+        public bool TrySellItem(SalesPerson person, string item)
         {
             bool success = false;
             int newStockLevel = _stock.AddOrUpdate(item,
@@ -72,7 +77,11 @@ namespace ConcurrentCollections
 
                 );
             if (success)
+            {
                 Interlocked.Increment(ref _totalQuantitySold);
+                _toDoQueue.AddTrade(new Trade(person, 1));
+            }
+                
             return success;
         }
 

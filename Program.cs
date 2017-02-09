@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,17 +13,36 @@ namespace ConcurrentCollections
 
         static void Main(string[] args)
         {
+            BonusCalculator bonusCalculator = new BonusCalculator();
+            ToDoQueue toDoQueue = new ToDoQueue(bonusCalculator);
 
-            StockController controller = new StockController();
-            TimeSpan workDay = new TimeSpan(0, 0, 2);
+            StockController controller = new StockController(toDoQueue);
 
-            Task t1 = Task.Run(() => new SalesPerson("Mark").Work(controller, workDay));
-            Task t2 = Task.Run(() => new SalesPerson("Larry").Work(controller, workDay));
-            Task t3 = Task.Run(() => new SalesPerson("Bill").Work(controller, workDay));
-            Task t4 = Task.Run(() => new SalesPerson("Paal").Work(controller, workDay));
+            SalesPerson[] sales =
+            {
+                new SalesPerson("Mark"),
+                new SalesPerson("Larry"),
+                new SalesPerson("Bill"),
+                new SalesPerson("Paal")
+            };
+
+            TimeSpan workDay = new TimeSpan(0, 0, 1);
+
+            Task t1 = Task.Run(() => sales[0].Work(controller, workDay));
+            Task t2 = Task.Run(() => sales[1].Work(controller, workDay));
+            Task t3 = Task.Run(() => sales[2].Work(controller, workDay));
+            Task t4 = Task.Run(() => sales[3].Work(controller, workDay));
+
+            Task bonusLogger = Task.Run(() => toDoQueue.MonitorAndLogTrades());
+            Task bonusLogger2 = Task.Run(() => toDoQueue.MonitorAndLogTrades());
+
 
             Task.WaitAll(t1, t2, t3, t4);
+            toDoQueue.CompleteAdding();
+            Task.WaitAll(bonusLogger, bonusLogger2);
+
             controller.DisplayStatus();
+            bonusCalculator.DisplayReport(sales);
 
             //var stock = new ConcurrentDictionary<string, int>();
             //stock.TryAdd("A",4);

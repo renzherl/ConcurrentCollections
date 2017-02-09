@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ConcurrentCollections
 {
@@ -29,14 +25,14 @@ namespace ConcurrentCollections
                 if (buy)
                 {
                     int quantity = rand.Next(9) + 1;
-                    //stockController.BuyStock(itemName, quantity);
-                    stockController.BuyStockWithLock(itemName, quantity);
+                    stockController.BuyStock(this,itemName, quantity);
+                    //stockController.BuyStockWithLock(itemName, quantity);
                     DisplayPurchase(itemName, quantity);
                 }
                 else
                 {
-                    //bool success = stockController.TrySellItem(itemName);
-                    bool success = stockController.TrySellItemWithLock(itemName);
+                    bool success = stockController.TrySellItem(this,itemName);
+                    //bool success = stockController.TrySellItemWithLock(itemName);
                     DisplaySaleAttempt(success, itemName);
                 }
             }
