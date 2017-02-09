@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Threading;
 
 namespace ConcurrentCollections
 {
     public class ToDoQueue
     {
-        private readonly ConcurrentQueue<Trade> _queue = new ConcurrentQueue<Trade>();
-        private Boolean _workingDayComplete = false;
+        private readonly BlockingCollection<Trade> _queue = new BlockingCollection<Trade>();
         private readonly BonusCalculator _bonusCalculator;
 
         public ToDoQueue(BonusCalculator bonusCalculator)
@@ -17,34 +17,28 @@ namespace ConcurrentCollections
 
         public void AddTrade(Trade trade)
         {
-            _queue.Enqueue(trade);
+            _queue.Add(trade);
         }
 
         public void CompleteAdding()
         {
-            _workingDayComplete = true;
+            _queue.CompleteAdding();
         }
 
         public void MonitorAndLogTrades()
         {
             while (true)
             {
-                Trade nextTrade;
-                bool hasNextTrade = _queue.TryDequeue(out nextTrade);
-                if (hasNextTrade)
+                try
                 {
+                    Trade nextTrade =_queue.Take();
                     _bonusCalculator.ProcessTrade(nextTrade);
                     Console.WriteLine("Processing transaction from " + nextTrade.Person.Name);
                 }
-                else if (_workingDayComplete)
+                catch(InvalidOperationException ex)
                 {
-                    Console.WriteLine("No more sales to log - exiting");
+                    Console.WriteLine(ex.Message);
                     return;
-                }
-                else
-                {
-                    Console.WriteLine("No more transaction");
-                    Thread.Sleep(500);
                 }
             }
         }
